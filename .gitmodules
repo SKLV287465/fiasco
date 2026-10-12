@@ -1,9 +1,15 @@
-[submodule "fiasco"]
-    path = pkg/kernel
-    url = https://github.com/kernkonzept/fiasco.git
-[submodule "l4re-core"]
-    path = pkg/core
-    url = https://github.com/kernkonzept/l4re-core.git
-[submodule "bootstrap"]
-    path = pkg/bootstrap
-    url = https://github.com/kernkonzept/bootstrap.git
+[submodule "pkg/libfdt"]
+	path = pkg/libfdt
+	url = https://github.com/kernkonzept/libfdt.git
+[submodule "pkg/drivers-frst"]
+	path = pkg/drivers-frst
+	url = https://github.com/kernkonzept/drivers-frst.git
+[submodule "pkg/bootstrap"]
+	path = pkg/bootstrap
+	url = https://github.com/kernkonzept/bootstrap.git
+[submodule "pkg/core"]
+	path = pkg/core
+	url = https://github.com/kernkonzept/l4re-core.git
+[submodule "pkg/kernel"]
+	path = pkg/kernel
+	url = https://github.com/kernkonzept/fiasco.git
