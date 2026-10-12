@@ -148,5 +148,7 @@ int minor_pf(void)
         printf("%lu\n", after_faults[i] - before_faults[i]);
     #endif
 
+    printf("benchmark done\n");
+
     return 0;
 }

@@ -23,3 +23,6 @@ We welcome contributions. Please see the
 Detailed licensing and copyright information can be found in the
 [LICENSE](LICENSE.spdx) file. Licensing information for packages
 in `pkg/` and `test/` are located in each subdirectory.
+
+# Kernel benchmarking config
+replace ../build/fiasco-rpi4/globalconfig.out with globalconfig.out in this directory.
