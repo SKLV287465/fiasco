@@ -287,7 +287,7 @@ generate_l4defs_files = \
 	$(call generate_l4defs_files_step,sharedlib,$(1)); \
 	$(call generate_l4defs_files_step,finalize,$(1))
 
-$(firstword $(L4DEFS_FILES)): $(OBJ_DIR)/.Package.deps pkg/l4re-core \
+$(firstword $(L4DEFS_FILES)): $(OBJ_DIR)/.Package.deps pkg/core \
                  $(DROPSCONF_CONFIG_MK) $(L4DIR)/mk/export_defs.inc
 	+$(VERBOSE)$(foreach v,$(USED_VARIANTS),$(call generate_l4defs_files,$(v));)
 
@@ -327,7 +327,7 @@ SYSROOT_LIB_DIRS  = $(addprefix libc/$(CONFIG_L4_LIBC)/,libc libm librt) \
                     ldscripts ldso libgcc-crt libgcc_eh
 
 OUTPUT_FORMAT = $(CC) $(CFLAGS) -Wl,--verbose 2>&1 | $(SED) -n '/OUTPUT_FORMAT/,/)/p'
-SYSROOT_PACKAGES = $(addprefix pkg/l4re-core/,ldso libc_backends libc)
+SYSROOT_PACKAGES = $(addprefix pkg/core/,ldso libc_backends libc)
 .PHONY: sysroot
 sysroot: $(SYSROOT_PACKAGES)
 	@$(GEN_MESSAGE)
@@ -342,9 +342,9 @@ sysroot: $(SYSROOT_PACKAGES)
 	$(VERBOSE)$(CP) -Lr $(OBJ_DIR)/include/l4/{crtn,cxx,l4re_vfs,libc_backends,re,sys,util,bid_config.h} \
 	                    $(OBJ_DIR)/sysroot/usr/include/l4/
 	$(VERBOSE)$(CP) -Lr $(OBJ_DIR)/include/$(CONFIG_L4_LIBC)/* $(OBJ_DIR)/sysroot/usr/include/
-	$(VERBOSE)$(MAKE) S='$(addprefix pkg/l4re-core/,$(SYSROOT_LIB_DIRS))' LD_SCRIPTS='' install \
+	$(VERBOSE)$(MAKE) S='$(addprefix pkg/core/,$(SYSROOT_LIB_DIRS))' LD_SCRIPTS='' install \
 	                    INSTALLDIR_LIB=$(OBJ_DIR)/sysroot/usr/lib INSTALLDIR_INC=$(OBJ_DIR)/sysroot/usr/include
-	$(VERBOSE)$(MAKE) S=pkg/l4re-core/libpthread/src TARGET=libpthread.a install \
+	$(VERBOSE)$(MAKE) S=pkg/core/libpthread/src TARGET=libpthread.a install \
 	                    INSTALLDIR_LIB=$(OBJ_DIR)/sysroot/usr/lib INSTALLDIR_INC=$(OBJ_DIR)/sysroot/usr/include
 	$(VERBOSE)mv $(OBJ_DIR)/sysroot/usr/lib/libc_nonshared.p.a  $(OBJ_DIR)/sysroot/usr/lib/libc_nonshared.a
 	$(if $(filter uclibc-ng,$(CONFIG_L4_LIBC)),$(VERBOSE)$(RM) $(OBJ_DIR)/sysroot/usr/lib/libc.so)
