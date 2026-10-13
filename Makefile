@@ -18,7 +18,7 @@ BUILD_TOOLS    = bash bison flex gawk perl tput \
                      $(if $(findstring =,$(x)),,$(x)))))
 BUILD_TOOLS_pkg/uvmm  := dtc
 
-CMDS_WITHOUT_OBJDIR := help checkbuild checkbuild.% check_build_tools
+CMDS_WITHOUT_OBJDIR := help checkbuild checkbuild.% check_build_tools bench bench-%
 CMDS_PROJECT_MK     := all clean cleanall install scrub cont doc help sysroot \
                        $(wildcard $(MAKECMDGOALS))
 
@@ -1100,3 +1100,60 @@ test:
 	rm -fr "$${test_tmp_dir}"
 
 endif
+
+############################################################
+# pfl bench
+
+BENCH_BUILD_DIR  ?= $(CURDIR)/build
+BENCH_KERNEL_DIR ?= $(BENCH_BUILD_DIR)/kernel
+BENCH_L4_DIR     ?= $(BENCH_BUILD_DIR)/l4
+BENCH_KERNEL_T   ?= arm64-rpi4
+BENCH_L4_T       ?= arm64-rv-v8a
+BENCH_PT         ?= rpi
+BENCH_ENTRY      ?= minor_pf
+BENCH_IMAGE      ?= rawimage
+BENCH_CROSS      ?= aarch64-none-elf-
+BENCH_JOBS       ?= $(shell nproc)
+
+.PHONY: bench bench-inc bench-clean bench-check \
+        bench-kernel bench-kernel-build bench-l4 bench-image
+
+bench: bench-clean
+	$(MAKE) bench-check
+	$(MAKE) bench-kernel
+	$(MAKE) bench-l4
+	$(MAKE) bench-image
+
+# bench-kernel-clean: 
+
+bench-check:
+	test -f pkg/kernel/Makefile -a -f pkg/core/Makefile || {         \
+	  echo "ERROR: submodules missing. Run:" >&2;                    \
+	  echo "  git submodule update --init --recursive" >&2;          \
+	  exit 1;                                                        \
+	}
+
+bench-clean:
+	$(if $(filter $(CURDIR)/%,$(BENCH_BUILD_DIR)),,$(error BENCH_BUILD_DIR "$(BENCH_BUILD_DIR)" is not below $(CURDIR) - refusing to delete))
+	rm -rf $(BENCH_BUILD_DIR)
+
+bench-kernel:
+	test -f $(BENCH_KERNEL_DIR)/Makefile ||                          \
+	  $(MAKE) -C pkg/kernel B=$(BENCH_KERNEL_DIR) T=$(BENCH_KERNEL_T)
+	echo 'CROSS_COMPILE_arm64 = $(BENCH_CROSS)' > $(BENCH_KERNEL_DIR)/Makeconf.local
+	cp $(CURDIR)/globalconfig.out $(BENCH_KERNEL_DIR)/globalconfig.out
+	$(MAKE) -C $(BENCH_KERNEL_DIR) olddefconfig
+	$(MAKE) bench-kernel-build
+
+bench-kernel-build:
+	$(MAKE) -C $(BENCH_KERNEL_DIR) -j$(BENCH_JOBS)
+
+bench-l4:
+	test -f $(BENCH_L4_DIR)/.kconfig ||                              \
+	  $(MAKE) B=$(BENCH_L4_DIR) T=$(BENCH_L4_T) PLATFORM_TYPE=$(BENCH_PT)
+	$(MAKE) O=$(BENCH_L4_DIR) -j$(BENCH_JOBS)
+
+bench-image:
+	$(MAKE) O=$(BENCH_L4_DIR) $(BENCH_IMAGE) E=$(BENCH_ENTRY)        \
+	  MODULE_SEARCH_PATH=$(BENCH_KERNEL_DIR)
+	@echo; echo "images in $(BENCH_L4_DIR)/images:"; ls -l $(BENCH_L4_DIR)/images

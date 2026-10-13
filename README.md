@@ -24,5 +24,31 @@ Detailed licensing and copyright information can be found in the
 [LICENSE](LICENSE.spdx) file. Licensing information for packages
 in `pkg/` and `test/` are located in each subdirectory.
 
-# Kernel benchmarking config
-replace ../build/fiasco-rpi4/globalconfig.out with globalconfig.out in this directory.
+# What my changes do
+
+This implementation is a page fault latency benchmarking setup measuring
+L4Re's page fault latency of private anonymous memory caused from lazy
+allocation. The benchmark lives in `pkg/page_fault_latency`.
+
+# Building the benchmark
+
+```
+make bench
+```
+
+Each `make bench` wipes build then from scratch creates `build/kernel`
+from the `arm64-rpi` kernel template, copies `globalconfig.out` to
+benchmark config, build l4re and page_fault_latency and builds boot image.
+
+```
+make bench-inc     # incremental: keeps both build dirs and their configs
+make bench-clean   # delete build/
+make help          # all targets
+```
+
+Useful overrides: `BENCH_IMAGE` (`rawimage`, `uimage`, `elfimage`, `qemu`),
+`BENCH_ENTRY`, `BENCH_JOBS`, `BENCH_CROSS`, `BENCH_BUILD_DIR`.
+
+`make bench` re-asserts `globalconfig.out` in the kernel build directory on
+every run; `make bench-inc` does not, so a manual `make menuconfig` in
+`build/kernel` survives incremental builds.
