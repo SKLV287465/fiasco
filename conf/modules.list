@@ -212,5 +212,5 @@ entry minor_pf
 roottask moe rom/minor_pf.cfg
 module l4re
 module ned
-module minor_pf.cfg
+module ned/page_fault_latency/minor_pf.cfg
 module minor_pf
